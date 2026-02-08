@@ -36,6 +36,24 @@ const server = http.createServer((req, res) => {
     return sendJson(res, 404, { error: "Not found", path: req.url });
   }
 
+
+  // Serve frontend JS
+  if (req.url === "/app.js") {
+    const jsPath = path.join(__dirname, "..", "frontend", "app.js");
+
+    return fs.readFile(jsPath, "utf8", (err, js) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+        return res.end("Cannot read frontend/app.js");
+      }
+
+      res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
+      res.end(js);
+    });
+  }
+
+
+
   // Serve index.html for everything else
   const filePath = path.join(__dirname, "..", "frontend", "index.html");
 
