@@ -12,7 +12,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Serve index.html for everything else
-  const filePath = path.join(__dirname, "index.html");
+  const filePath = path.join(__dirname, "..", "frontend", "index.html");
 
   fs.readFile(filePath, "utf8", (err, html) => {
     if (err) {
