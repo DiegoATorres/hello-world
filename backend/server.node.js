@@ -50,7 +50,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
       res.end(js);
     });
-  }
+  } 
 
 
 
