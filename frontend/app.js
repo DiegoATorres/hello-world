@@ -1,3 +1,5 @@
+import { getTime } from "./api.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const button = document.getElementById("btnTime");
   const output = document.getElementById("output");
@@ -7,22 +9,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  button.addEventListener("click", async () => {
+  async function loadTime() {
     output.textContent = "Loading...";
 
     try {
-      const response = await fetch("/api/time");
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await getTime();
       output.textContent = JSON.stringify(data, null, 2);
     } catch (err) {
       output.textContent = `Error: ${err.message}`;
     }
-  });
+  }
+
+  loadTime();                 // auto-load
+  button.addEventListener("click", loadTime); // refresh
 });
 
 
