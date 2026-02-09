@@ -4,6 +4,9 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
+// 👇 MIDDLEWARE PARA LEER JSON
+app.use(express.json());
+
 // --------------------
 // Static frontend
 // --------------------
@@ -27,9 +30,25 @@ app.get("/api/info", (req, res) => {
   res.json({
     name: "hello-world",
     version: "1.0.0",
-    endpoints: ["/", "/health", "/api/time", "/api/info"],
+    endpoints: ["/", "/health", "/api/time", "/api/info", "/api/echo"],
   });
 });
+
+app.post("/api/echo", (req, res) => {
+  const body = req.body;
+
+  if (!body || Object.keys(body).length === 0) {
+    return res.status(400).json({
+      error: "Body is required"
+    });
+  }
+
+  res.json({
+    received: body,
+    timestamp: new Date().toISOString()
+  });
+});
+
 
 // --------------------
 // 404 API fallback
