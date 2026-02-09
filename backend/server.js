@@ -1,74 +1,46 @@
-const http = require("http");
-const fs = require("fs");
+const express = require("express");
 const path = require("path");
 
+const app = express();
 const PORT = 3000;
 
-function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
-  res.end(JSON.stringify(payload, null, 2));
-}
+// --------------------
+// Static frontend
+// --------------------
+app.use(express.static(path.join(__dirname, "../frontend")));
 
-const server = http.createServer((req, res) => {
-  // Simple health endpoint
-  if (req.url === "/health") {
-    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    return res.end(JSON.stringify({ status: "ok" }));
-  }
-  // API: current server time
-  if (req.url === "/api/time") {
-    return sendJson(res, 200, {
-      now: new Date().toISOString(),
-      unix: Date.now(),
-    });
-  }
+// --------------------
+// API routes
+// --------------------
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
-  // API: basic app info
-  if (req.url === "/api/info") {
-    return sendJson(res, 200, {
-      name: "hello-world",
-      version: "1.0.0",
-      endpoints: ["/", "/health", "/api/time", "/api/info"],
-    });
-  }
-
-  if (req.url.startsWith("/api/")) {
-    return sendJson(res, 404, { error: "Not found", path: req.url });
-  }
-
-
-  // Serve frontend JS
-  if (req.url === "/app.js") {
-    const jsPath = path.join(__dirname, "..", "frontend", "app.js");
-
-    return fs.readFile(jsPath, "utf8", (err, js) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
-        return res.end("Cannot read frontend/app.js");
-      }
-
-      res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
-      res.end(js);
-    });
-  }
-
-
-
-  // Serve index.html for everything else
-  const filePath = path.join(__dirname, "..", "frontend", "index.html");
-
-  fs.readFile(filePath, "utf8", (err, html) => {
-    if (err) {
-      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
-      return res.end("Server error: cannot read index.html");
-    }
-
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(html);
+app.get("/api/time", (req, res) => {
+  res.json({
+    now: new Date().toISOString(),
+    unix: Date.now(),
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+app.get("/api/info", (req, res) => {
+  res.json({
+    name: "hello-world",
+    version: "1.0.0",
+    endpoints: ["/", "/health", "/api/time", "/api/info"],
+  });
 });
 
+// --------------------
+// 404 API fallback
+// --------------------
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "Not found", path: req.originalUrl });
+});
+
+// --------------------
+// Server start
+// --------------------
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
